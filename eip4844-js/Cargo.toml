@@ -10,7 +10,7 @@ edition = "2021"
 crate-type = ["cdylib", "rlib"]
 
 [features]
-default = ["console_error_panic_hook", "eip4844/insecure"]
+default = ["console_error_panic_hook"]
 parallel = ["eip4844/parallel"]
 
 [dependencies]
