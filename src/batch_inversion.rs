@@ -1,19 +1,9 @@
 use crate::Scalar;
 use ff::Field;
 
-// Batch inversion of multiple elements
-// This method will panic if one of the elements is zero
-pub fn batch_inverse(elements: &mut [Scalar]) {
-    batch_inversion(elements)
-}
-
-fn batch_inversion(v: &mut [Scalar]) {
-    serial_batch_inversion(v);
-}
-
 /// Given a vector of field elements {v_i}, compute the vector {coeff * v_i^(-1)}
 /// This method is explicitly single core.
-fn serial_batch_inversion(v: &mut [Scalar]) {
+pub fn serial_batch_inversion(v: &mut [Scalar]) {
     use std::ops::MulAssign;
 
     // Montgomery’s Trick and Fast Implementation of Masked AES

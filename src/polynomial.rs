@@ -1,4 +1,4 @@
-use crate::{batch_inversion::batch_inverse, Domain, Scalar};
+use crate::{batch_inversion::serial_batch_inversion, Domain, Scalar};
 use group::ff::Field;
 
 #[derive(Debug, Clone)]
@@ -60,7 +60,7 @@ impl Polynomial {
         let domain_size = domain.size();
 
         let mut denominator: Vec<_> = domain.roots().iter().map(|root_i| z - root_i).collect();
-        batch_inverse(&mut denominator);
+        serial_batch_inversion(&mut denominator);
 
         let mut result = Scalar::zero();
         // TODO Use zip here on evals, domain and denominator

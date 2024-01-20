@@ -150,6 +150,7 @@ fn fft_g1(nth_root_of_unity: Scalar, points: &[G1Projective]) -> Vec<G1Projectiv
 
     evaluations
 }
+
 fn take_even_odd<T: Clone>(list: &[T]) -> (Vec<T>, Vec<T>) {
     let mut even = Vec::with_capacity(list.len() / 2);
     let mut odd = Vec::with_capacity(list.len() / 2);

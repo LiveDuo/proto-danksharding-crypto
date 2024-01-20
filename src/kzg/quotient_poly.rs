@@ -1,4 +1,5 @@
-use crate::{batch_inversion::batch_inverse, Domain, Polynomial, Scalar};
+use crate::{batch_inversion::serial_batch_inversion, Domain, Polynomial, Scalar};
+
 use ff::Field;
 
 /// Computes the quotient polynomial for a kzg proof
@@ -39,7 +40,7 @@ pub fn compute_quotient_in_domain(
         .map(|root| root - input_point)
         .collect();
     denominator_poly[index_in_domain] = Scalar::one();
-    batch_inverse(&mut denominator_poly);
+    serial_batch_inversion(&mut denominator_poly);
 
     let mut quotient_poly = vec![Scalar::zero(); domain.size()];
     for i in 0..domain.size() {
@@ -92,7 +93,7 @@ pub fn compute_quotient_outside_domain(
         .map(|domain_element| *domain_element - input_point)
         .collect();
     // This should not panic, since we assume `input_point` is not in the domain
-    batch_inverse(&mut quotient);
+    serial_batch_inversion(&mut quotient);
 
     // Compute the numerator polynomial and multiply it by the quotient which holds the
     // denominator

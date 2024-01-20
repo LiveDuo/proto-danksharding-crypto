@@ -18,8 +18,7 @@ impl CommitKey {
         );
         CommitKey { inner: points }
     }
-    // Note: There is no commit method for CommitKey in monomial basis
-    // as this is not used
+    // Note: There is no commit method for CommitKey in monomial basis as this is not used
     pub fn into_lagrange(self, domain: &Domain) -> CommitKeyLagrange {
         CommitKeyLagrange {
             inner: domain.ifft_g1(self.inner),
@@ -34,9 +33,7 @@ impl CommitKey {
 /// - `i` ranges from 0 to `degree`
 /// -  L_i is the i'th lagrange polynomial
 /// - `G` is some generator of the group
-pub struct CommitKeyLagrange {
-    pub inner: Vec<G1Point>,
-}
+pub struct CommitKeyLagrange { pub inner: Vec<G1Point>, }
 
 impl CommitKeyLagrange {
     pub fn new(points: Vec<G1Point>) -> CommitKeyLagrange {
@@ -74,8 +71,7 @@ pub fn g1_lincomb(points: &[G1Point], scalars: &[Scalar]) -> G1Point {
         .collect();
 
     // blst does not use multiple threads
-    // TODO: the internal lib seems to be converting back to Affine, so we need to
-    // TODO create our own version of this function
+    // TODO: the internal lib seems to be converting back to Affine
     blstrs::G1Projective::multi_exp(&points, scalars).into()
 }
 
@@ -84,11 +80,7 @@ mod tests {
     use ff::Field;
     use group::prime::PrimeCurveAffine;
 
-    use crate::{
-        domain::Domain,
-        kzg::commit_key::{g1_lincomb, CommitKey},
-        G1Point, Scalar,
-    };
+    use crate::{domain::Domain, kzg::commit_key::*, G1Point, Scalar};
 
     fn eval_coeff_poly(poly: &[Scalar], input_point: &Scalar) -> Scalar {
         let mut result = Scalar::zero();
@@ -126,11 +118,8 @@ mod tests {
         let expected_commitment = g1_lincomb(&monomial_srs, &f_x_coeffs);
 
         // Commit to f(x) in lagrange form
-        let lagrange_srs = CommitKey {
-            inner: monomial_srs,
-        }
-        .into_lagrange(&domain)
-        .inner;
+        let commit_key = CommitKey { inner: monomial_srs, };
+        let lagrange_srs = commit_key.into_lagrange(&domain).inner;
         let got_commitment = g1_lincomb(&lagrange_srs, &f_x_evaluations);
 
         assert_eq!(expected_commitment, got_commitment)

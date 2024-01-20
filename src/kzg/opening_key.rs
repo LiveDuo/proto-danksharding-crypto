@@ -1,4 +1,5 @@
 use crate::{G1Point, G2Point, Scalar};
+
 use blstrs::{Bls12, G2Prepared};
 use pairing_lib::{group::Group, MillerLoopResult, MultiMillerLoop};
 

@@ -1,8 +1,6 @@
-/// This is the traditional KZG proof algorithm
-/// that follows from the KZG paper.
+/// This is the traditional KZG proof algorithm that follows from the KZG paper.
 ///
-/// It is left unmodified and is its own
-/// isolated module.
+/// It is left unmodified and is its own isolated module.
 use super::{commit_key::CommitKeyLagrange, opening_key::OpeningKey, quotient_poly};
 use crate::{Domain, G1Point, Polynomial, Scalar};
 
@@ -10,8 +8,7 @@ use crate::{Domain, G1Point, Polynomial, Scalar};
 pub type KZGWitness = G1Point;
 
 pub struct Proof {
-    // Commitment to the polynomial that we have created a
-    // KZG proof for.
+    // Commitment to the polynomial that we have created a KZG proof for.
     pub polynomial_commitment: G1Point,
 
     // Commitment to the `witness` or quotient polynomial
@@ -29,16 +26,9 @@ impl Proof {
         domain: &Domain,
     ) -> Proof {
         let output_point = poly.evaluate(input_point, domain);
-
         let quotient = quotient_poly::compute(poly, input_point, output_point, domain);
-
-        let quotient_comm = commit_key.commit(&quotient);
-
-        Proof {
-            polynomial_commitment: poly_comm,
-            quotient_commitment: quotient_comm,
-            output_point,
-        }
+        let quotient_commitment = commit_key.commit(&quotient);
+        Proof { polynomial_commitment: poly_comm, quotient_commitment, output_point }
     }
 
     pub fn verify(&self, input_point: Scalar, opening_key: &OpeningKey) -> bool {
@@ -53,37 +43,29 @@ impl Proof {
 
 #[cfg(test)]
 mod tests {
-    
+
     use ff::Field;
     use crate::PublicParameters;
 
     use super::*;
 
-    pub fn random_vector(length: usize) -> Vec<Scalar> {
+    fn random_vector(length: usize) -> Vec<Scalar> {
         (0..length).map(|_| Scalar::random(&mut rand::thread_rng())).collect()
     }
 
     #[test]
     fn valid_proof_smoke() {
-        // Setup parameters
-        //
+
         let size = 2usize.pow(8);
 
         let domain = Domain::new(size);
         let public_parameters = PublicParameters::from_secret_insecure(123456789, &domain);
 
         let poly = Polynomial::new(random_vector(size));
-        let input_point = Scalar::from(123456u64);
-
         let poly_comm = public_parameters.commit_key.commit(&poly);
-
-        let proof = Proof::create(
-            &public_parameters.commit_key,
-            &poly,
-            poly_comm,
-            input_point,
-            &domain,
-        );
+        
+        let input_point = Scalar::from(123456u64);
+        let proof = Proof::create(&public_parameters.commit_key, &poly, poly_comm, input_point, &domain);
         assert!(proof.verify(input_point, &public_parameters.opening_key));
         assert!(!proof.verify(input_point + input_point, &public_parameters.opening_key));
     }
