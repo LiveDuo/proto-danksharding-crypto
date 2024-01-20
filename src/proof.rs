@@ -1,28 +1,21 @@
-/// This is the traditional KZG proof algorithm that follows from the KZG paper.
-///
-/// It is left unmodified and is its own isolated module.
-use crate::{commit_key::CommitKeyLagrange, opening_key::OpeningKey};
-use crate::{domain::Domain, G1Point, polynomial::Polynomial, Scalar, utils};
-
-// Commitment to the quotient polynomial
-pub type KZGWitness = G1Point;
+use crate::{commit_key::*, opening_key::*, domain::Domain, polynomial::Polynomial, utils};
 
 pub struct Proof {
     // Commitment to the polynomial that we have created a KZG proof for.
-    pub polynomial_commitment: G1Point,
+    pub polynomial_commitment: blstrs::G1Affine,
 
     // Commitment to the `witness` or quotient polynomial
-    pub quotient_commitment: KZGWitness,
+    pub quotient_commitment: blstrs::G1Affine,
 
-    pub output_point: Scalar,
+    pub output_point: blstrs::Scalar,
 }
 
 impl Proof {
     pub fn create(
         commit_key: &CommitKeyLagrange,
         poly: &Polynomial,
-        poly_comm: G1Point,
-        input_point: Scalar,
+        poly_comm: blstrs::G1Affine,
+        input_point: blstrs::Scalar,
         domain: &Domain,
     ) -> Proof {
         let output_point = poly.evaluate(input_point, domain);
@@ -31,7 +24,7 @@ impl Proof {
         Proof { polynomial_commitment: poly_comm, quotient_commitment, output_point }
     }
 
-    pub fn verify(&self, input_point: Scalar, opening_key: &OpeningKey) -> bool {
+    pub fn verify(&self, input_point: blstrs::Scalar, opening_key: &OpeningKey) -> bool {
         opening_key.verify(
             input_point,
             self.output_point,
@@ -49,8 +42,8 @@ mod tests {
 
     use super::*;
 
-    fn random_vector(length: usize) -> Vec<Scalar> {
-        (0..length).map(|_| Scalar::random(&mut rand::thread_rng())).collect()
+    fn random_vector(length: usize) -> Vec<blstrs::Scalar> {
+        (0..length).map(|_| blstrs::Scalar::random(&mut rand::thread_rng())).collect()
     }
 
     #[test]
@@ -64,7 +57,7 @@ mod tests {
         let poly = Polynomial::new(random_vector(size));
         let poly_comm = public_parameters.commit_key.commit(&poly);
         
-        let input_point = Scalar::from(123456u64);
+        let input_point = blstrs::Scalar::from(123456u64);
         let proof = Proof::create(&public_parameters.commit_key, &poly, poly_comm, input_point, &domain);
         assert!(proof.verify(input_point, &public_parameters.opening_key));
         assert!(!proof.verify(input_point + input_point, &public_parameters.opening_key));

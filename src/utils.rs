@@ -1,4 +1,4 @@
-use crate::{domain::Domain, polynomial::Polynomial, Scalar};
+use crate::{domain::Domain, polynomial::Polynomial};
 
 use ff::Field;
 
@@ -9,8 +9,8 @@ use ff::Field;
 /// - `z` is the point being passed as input
 pub fn compute(
     poly: &Polynomial,
-    input_point: Scalar,
-    output_point: Scalar,
+    input_point: blstrs::Scalar,
+    output_point: blstrs::Scalar,
     domain: &Domain,
 ) -> Polynomial {
     match domain.find(&input_point) {
@@ -24,7 +24,7 @@ pub fn compute(
 fn compute_quotient_in_domain(
     poly: &Polynomial,
     index_in_domain: usize,
-    output_point: Scalar,
+    output_point: blstrs::Scalar,
     domain: &Domain,
 ) -> Polynomial {
     let polynomial_shifted: Vec<_> = poly
@@ -39,10 +39,10 @@ fn compute_quotient_in_domain(
         .iter()
         .map(|root| root - input_point)
         .collect();
-    denominator_poly[index_in_domain] = Scalar::one();
+    denominator_poly[index_in_domain] = blstrs::Scalar::one();
     serial_batch_inversion(&mut denominator_poly);
 
-    let mut quotient_poly = vec![Scalar::zero(); domain.size()];
+    let mut quotient_poly = vec![blstrs::Scalar::zero(); domain.size()];
     for i in 0..domain.size() {
         if i == index_in_domain {
             quotient_poly[i] =
@@ -58,15 +58,15 @@ fn compute_quotient_in_domain(
 fn compute_quotient_eval_within_domain(
     poly: &Polynomial,
     index_in_domain: usize,
-    output_point: Scalar,
+    output_point: blstrs::Scalar,
     domain: &Domain,
-) -> Scalar {
+) -> blstrs::Scalar {
     // TODO Assumes that index_in_domain is in the domain
     // TODO: should we use a special Index struct/enum to encode this?
     let input_point = domain[index_in_domain];
 
     // TODO: optimize with batch_inverse
-    let mut result = Scalar::zero();
+    let mut result = blstrs::Scalar::zero();
     for (index, root) in domain.roots().iter().enumerate() {
         if index == index_in_domain {
             continue;
@@ -82,8 +82,8 @@ fn compute_quotient_eval_within_domain(
 }
 fn compute_quotient_outside_domain(
     poly: &Polynomial,
-    input_point: Scalar,
-    output_point: Scalar,
+    input_point: blstrs::Scalar,
+    output_point: blstrs::Scalar,
     domain: &Domain,
 ) -> Polynomial {
     // Compute the denominator and store it in the quotient vector, to avoid re-allocation
@@ -119,7 +119,7 @@ use std::ops::MulAssign;
 
 /// Given a vector of field elements {v_i}, compute the vector {coeff * v_i^(-1)}
 /// This method is explicitly single core.
-pub fn serial_batch_inversion(v: &mut [Scalar]) {
+pub fn serial_batch_inversion(v: &mut [blstrs::Scalar]) {
     
     // Montgomery’s Trick and Fast Implementation of Masked AES
     // Genelle, Prouff and Quisquater
@@ -127,8 +127,8 @@ pub fn serial_batch_inversion(v: &mut [Scalar]) {
     // but with an optimization to multiply every element in the returned vector by coeff
 
     // First pass: compute [a, ab, abc, ...]
-    let mut prod = Vec::with_capacity(v.len());
-    let mut tmp = Scalar::one();
+    let mut prod: Vec<_> = Vec::with_capacity(v.len());
+    let mut tmp = blstrs::Scalar::one();
     for f in v.iter().filter(|f| !f.is_zero_vartime()) {
         tmp.mul_assign(f);
         prod.push(tmp);
@@ -147,7 +147,7 @@ pub fn serial_batch_inversion(v: &mut [Scalar]) {
         // Ignore normalized elements
         .filter(|f| !f.is_zero_vartime())
         // Backwards, skip last element, fill in one for last term.
-        .zip(prod.into_iter().rev().skip(1).chain(Some(Scalar::one())))
+        .zip(prod.into_iter().rev().skip(1).chain(Some(blstrs::Scalar::one())))
     {
         // tmp := tmp * f; f := tmp * s = 1/f
         let new_tmp = tmp * *f;

@@ -1,4 +1,4 @@
-use crate::{domain::Domain, polynomial::Polynomial, G1Point, Scalar};
+use crate::{domain::Domain, polynomial::Polynomial};
 
 // The key that is used to commit to polynomials in monomial form
 //
@@ -6,10 +6,10 @@ use crate::{domain::Domain, polynomial::Polynomial, G1Point, Scalar};
 ///  Where:
 /// - `i` ranges from 0 to `degree`.
 /// - `G` is some generator of the group
-pub struct CommitKey { inner: Vec<G1Point>, }
+pub struct CommitKey { inner: Vec<blstrs::G1Affine>, }
 
 impl CommitKey {
-    pub fn new(points: Vec<G1Point>) -> CommitKey {
+    pub fn new(points: Vec<blstrs::G1Affine>) -> CommitKey {
         assert!(
             !points.is_empty(),
             "cannot initialize `CommitKey` with no points"
@@ -30,16 +30,16 @@ impl CommitKey {
 /// - `i` ranges from 0 to `degree`
 /// -  L_i is the i'th lagrange polynomial
 /// - `G` is some generator of the group
-pub struct CommitKeyLagrange { inner: Vec<G1Point>, }
+pub struct CommitKeyLagrange { inner: Vec<blstrs::G1Affine>, }
 
 impl CommitKeyLagrange {
-    pub fn new(points: Vec<G1Point>) -> CommitKeyLagrange {
+    pub fn new(points: Vec<blstrs::G1Affine>) -> CommitKeyLagrange {
         assert!(points.len() > 1);
         CommitKeyLagrange { inner: points }
     }
 
     /// Commit to `polynomial` in lagrange form
-    pub fn commit(&self, polynomial: &Polynomial) -> G1Point {
+    pub fn commit(&self, polynomial: &Polynomial) -> blstrs::G1Affine {
         g1_lincomb(&self.inner, &polynomial.evaluations)
     }
 
@@ -54,7 +54,7 @@ impl CommitKeyLagrange {
 }
 
 // A multi-scalar multiplication
-pub fn g1_lincomb(points: &[G1Point], scalars: &[Scalar]) -> G1Point {
+pub fn g1_lincomb(points: &[blstrs::G1Affine], scalars: &[blstrs::Scalar]) -> blstrs::G1Affine {
     // TODO: We could use arkworks here and use their parallelized multi-exp instead
 
     // TODO: Spec says we should panic, but as a lib its better to return result
@@ -76,10 +76,10 @@ mod tests {
     use ff::Field;
     use group::prime::PrimeCurveAffine;
 
-    use crate::{domain::Domain, commit_key::*, G1Point, Scalar};
+    use crate::{domain::Domain, commit_key::*};
 
-    fn eval_coeff_poly(poly: &[Scalar], input_point: &Scalar) -> Scalar {
-        let mut result = Scalar::zero();
+    fn eval_coeff_poly(poly: &[blstrs::Scalar], input_point: &blstrs::Scalar) -> blstrs::Scalar {
+        let mut result = blstrs::Scalar::zero();
         for (index, coeff) in poly.iter().enumerate() {
             result += input_point.pow_vartime(&[index as u64]) * coeff;
         }
@@ -93,7 +93,7 @@ mod tests {
         let domain = Domain::new(degree);
 
         // f(x) -- These are the coefficients of the polynomial
-        let f_x_coeffs: Vec<_> = (0..degree as u64).into_iter().map(Scalar::from).collect();
+        let f_x_coeffs: Vec<_> = (0..degree as u64).into_iter().map(blstrs::Scalar::from).collect();
 
         // Evaluate f(x) over the domain -- To get the evaluation form of f(x)
         let f_x_evaluations: Vec<_> = domain
@@ -102,11 +102,11 @@ mod tests {
             .map(|root| eval_coeff_poly(&f_x_coeffs, root))
             .collect();
 
-        let secret = Scalar::from(1234567u64);
-        let monomial_srs: Vec<G1Point> = (0..degree)
+        let secret = blstrs::Scalar::from(1234567u64);
+        let monomial_srs: Vec<blstrs::G1Affine> = (0..degree)
             .map(|index| {
                 let secret_exp = secret.pow_vartime(&[index as u64]);
-                (G1Point::generator() * secret_exp).into()
+                (blstrs::G1Affine::generator() * secret_exp).into()
             })
             .collect();
 

@@ -1,11 +1,12 @@
-use crate::{utils::serial_batch_inversion, domain::Domain, Scalar};
+use crate::{domain::Domain, utils};
+
 use group::ff::Field;
 
 #[derive(Debug, Clone)]
 // Polynomial representation in evaluation form
 // The domain is not saved with the struct to save memory
 pub struct Polynomial {
-    pub evaluations: Vec<Scalar>,
+    pub evaluations: Vec<blstrs::Scalar>,
 }
 
 impl PartialEq for Polynomial {
@@ -15,7 +16,7 @@ impl PartialEq for Polynomial {
 }
 
 impl std::ops::Index<usize> for &Polynomial {
-    type Output = Scalar;
+    type Output = blstrs::Scalar;
 
     fn index(&self, i: usize) -> &Self::Output {
         &self.evaluations[i]
@@ -25,7 +26,7 @@ impl std::ops::Index<usize> for &Polynomial {
 impl Polynomial {
     /// Panics, if the number of evaluations is 0 or not a power of two
     /// 0 is not a power of two, so we can remove it
-    pub fn new(evaluations: Vec<Scalar>) -> Polynomial {
+    pub fn new(evaluations: Vec<blstrs::Scalar>) -> Polynomial {
         // We could return an Option, users of the library
         // who consume this API directly, will be forced to unwrap.
         //
@@ -41,7 +42,7 @@ impl Polynomial {
         Polynomial { evaluations }
     }
 
-    pub fn evaluate(&self, z: Scalar, domain: &Domain) -> Scalar {
+    pub fn evaluate(&self, z: blstrs::Scalar, domain: &Domain) -> blstrs::Scalar {
         assert_eq!(
             self.num_evaluations(),
             domain.size(),
@@ -56,18 +57,18 @@ impl Polynomial {
 
     // Using the barycentric formula, one can evaluate a polynomial
     // in evaluation form, on a point `z` that is not inside of its domain
-    fn evaluate_outside_of_domain(&self, z: Scalar, domain: &Domain) -> Scalar {
+    fn evaluate_outside_of_domain(&self, z: blstrs::Scalar, domain: &Domain) -> blstrs::Scalar {
         let domain_size = domain.size();
 
         let mut denominator: Vec<_> = domain.roots().iter().map(|root_i| z - root_i).collect();
-        serial_batch_inversion(&mut denominator);
+        utils::serial_batch_inversion(&mut denominator);
 
-        let mut result = Scalar::zero();
+        let mut result = blstrs::Scalar::zero();
         // TODO Use zip here on evals, domain and denominator
         for i in 0..domain_size {
             result += (self.evaluations[i] * domain[i]) * denominator[i];
         }
-        result * (z.pow_vartime(&[domain_size as u64]) - Scalar::one()) * domain.domain_size_inv
+        result * (z.pow_vartime(&[domain_size as u64]) - blstrs::Scalar::one()) * domain.domain_size_inv
     }
 
     fn num_evaluations(&self) -> usize {

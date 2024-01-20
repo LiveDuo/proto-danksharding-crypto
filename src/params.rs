@@ -1,5 +1,4 @@
-use crate::{commit_key::*, opening_key::OpeningKey };
-use crate::{domain::Domain, G1Point, G2Point};
+use crate::{commit_key::*, opening_key::OpeningKey, domain::Domain};
 
 // This is the SRS in lagrange form.
 //
@@ -11,19 +10,18 @@ pub struct PublicParameters {
 
 impl PublicParameters {
     pub fn from_secret_insecure(tau: u64, domain: &Domain) -> Self {
-        use crate::Scalar;
         use ff::Field;
         use group::prime::PrimeCurveAffine;
 
-        let tau_fr = Scalar::from(tau);
-        let g1_gen = G1Point::generator();
-        let g2_gen = G2Point::generator();
+        let tau_fr = blstrs::Scalar::from(tau);
+        let g1_gen = blstrs::G1Affine::generator();
+        let g2_gen = blstrs::G2Affine::generator();
         let tau_g2_gen = (g2_gen * tau_fr).into();
 
-        let powers_of_tau_g1: Vec<G1Point> = (0..domain.size())
+        let powers_of_tau_g1: Vec<blstrs::G1Affine> = (0..domain.size())
             .map(|index| {
                 let secret_exp = tau_fr.pow_vartime(&[index as u64]);
-                (G1Point::generator() * secret_exp).into()
+                (blstrs::G1Affine::generator() * secret_exp).into()
             })
             .collect();
 
