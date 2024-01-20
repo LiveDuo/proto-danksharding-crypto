@@ -5,7 +5,7 @@ use group::ff::Field;
 // Polynomial representation in evaluation form
 // The domain is not saved with the struct to save memory
 pub struct Polynomial {
-    pub(crate) evaluations: Vec<Scalar>,
+    pub evaluations: Vec<Scalar>,
 }
 
 impl PartialEq for Polynomial {

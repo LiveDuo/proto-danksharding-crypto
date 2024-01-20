@@ -6,7 +6,7 @@ use ff::Field;
 /// The state being proved is p(z) = y
 /// Where:
 /// - `z` is the point being passed as input
-pub(crate) fn compute(
+pub fn compute(
     poly: &Polynomial,
     input_point: Scalar,
     output_point: Scalar,
@@ -20,7 +20,7 @@ pub(crate) fn compute(
     }
 }
 
-pub(crate) fn compute_quotient_in_domain(
+pub fn compute_quotient_in_domain(
     poly: &Polynomial,
     index_in_domain: usize,
     output_point: Scalar,
@@ -79,7 +79,7 @@ fn compute_quotient_eval_within_domain(
 
     todo!()
 }
-pub(crate) fn compute_quotient_outside_domain(
+pub fn compute_quotient_outside_domain(
     poly: &Polynomial,
     input_point: Scalar,
     output_point: Scalar,

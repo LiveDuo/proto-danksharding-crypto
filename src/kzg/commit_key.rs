@@ -1,6 +1,4 @@
 use crate::{domain::Domain, polynomial::Polynomial, G1Point, Scalar};
-#[cfg(feature = "rayon")]
-use rayon::prelude::*;
 
 // The key that is used to commit to polynomials in monomial form
 //

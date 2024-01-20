@@ -1,5 +1,3 @@
-#[cfg(test)]
-pub mod test_utils;
 
 mod batch_inversion;
 mod domain;
@@ -19,7 +17,7 @@ pub const G1_POINT_SERIALIZED_SIZE: usize = 48;
 pub const G2_POINT_SERIALIZED_SIZE: usize = 96;
 
 // TODO: we can just make this the default type
-pub(crate) type G1Projective = blstrs::G1Projective;
+pub type G1Projective = blstrs::G1Projective;
 
 pub use domain::Domain;
 pub use kzg::{

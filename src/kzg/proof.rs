@@ -53,17 +53,26 @@ impl Proof {
 
 #[cfg(test)]
 mod tests {
+    
+    use ff::Field;
+    use crate::PublicParameters;
+
     use super::*;
-    use crate::test_utils::{random_polynomial, test_setup};
+
+    pub fn random_vector(length: usize) -> Vec<Scalar> {
+        (0..length).map(|_| Scalar::random(&mut rand::thread_rng())).collect()
+    }
 
     #[test]
     fn valid_proof_smoke() {
         // Setup parameters
         //
         let size = 2usize.pow(8);
-        let (public_parameters, domain) = test_setup(size);
 
-        let poly = random_polynomial(size);
+        let domain = Domain::new(size);
+        let public_parameters = PublicParameters::from_secret_insecure(123456789, &domain);
+
+        let poly = Polynomial::new(random_vector(size));
         let input_point = Scalar::from(123456u64);
 
         let poly_comm = public_parameters.commit_key.commit(&poly);

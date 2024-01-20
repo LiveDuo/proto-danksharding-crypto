@@ -77,19 +77,19 @@ impl Domain {
         32
     }
 
-    pub(crate) fn size(&self) -> usize {
+    pub fn size(&self) -> usize {
         self.roots.len()
     }
 
-    pub(crate) fn find(&self, element: &Scalar) -> Option<usize> {
+    pub fn find(&self, element: &Scalar) -> Option<usize> {
         self.roots.iter().position(|root_i| root_i == element)
     }
 
-    pub(crate) fn roots(&self) -> &[Scalar] {
+    pub fn roots(&self) -> &[Scalar] {
         &self.roots
     }
 
-    pub(crate) fn ifft_g1(&self, points: Vec<G1Point>) -> Vec<G1Point> {
+    pub fn ifft_g1(&self, points: Vec<G1Point>) -> Vec<G1Point> {
         if points.len() != self.size() {
             panic!(
                 "number of points {}, must equal the domain size {}",
