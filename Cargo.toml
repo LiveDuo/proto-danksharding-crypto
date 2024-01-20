@@ -1,3 +1,32 @@
-[workspace]
+[package]
+name = "crypto"
+version = "0.1.0"
+edition = "2021"
 
-members = ["crypto", "eip4844"]
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+sha2 = "0.10.6"
+rayon = { version = "1.3", optional = true }
+
+# blstrs related dependencies
+blstrs = "0.6.1"
+ff = "0.12.0"
+group = "0.12"
+pairing_lib = { version = "0.22", package = "pairing" }
+
+
+# This is needed for test_utils, but we want to use test_utils 
+# in the benchmarks, so it cannot be gated behind a cfg(test)
+rand = "0.8.3"
+
+[dev-dependencies]
+criterion = "0.4"
+hex = "*"
+
+# [[bench]]
+# name = "benchmark"
+# harness = false
+
+[features]
+parallel = ["rayon"]
