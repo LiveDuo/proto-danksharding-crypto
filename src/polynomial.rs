@@ -1,4 +1,4 @@
-use crate::{batch_inversion::serial_batch_inversion, Domain, Scalar};
+use crate::{utils::serial_batch_inversion, domain::Domain, Scalar};
 use group::ff::Field;
 
 #[derive(Debug, Clone)]

@@ -76,7 +76,7 @@ mod tests {
     use ff::Field;
     use group::prime::PrimeCurveAffine;
 
-    use crate::{domain::Domain, kzg::commit_key::*, G1Point, Scalar};
+    use crate::{domain::Domain, commit_key::*, G1Point, Scalar};
 
     fn eval_coeff_poly(poly: &[Scalar], input_point: &Scalar) -> Scalar {
         let mut result = Scalar::zero();

@@ -1,8 +1,8 @@
 /// This is the traditional KZG proof algorithm that follows from the KZG paper.
 ///
 /// It is left unmodified and is its own isolated module.
-use super::{commit_key::CommitKeyLagrange, opening_key::OpeningKey, quotient_poly};
-use crate::{Domain, G1Point, Polynomial, Scalar};
+use crate::{commit_key::CommitKeyLagrange, opening_key::OpeningKey};
+use crate::{domain::Domain, G1Point, polynomial::Polynomial, Scalar, utils};
 
 // Commitment to the quotient polynomial
 pub type KZGWitness = G1Point;
@@ -26,7 +26,7 @@ impl Proof {
         domain: &Domain,
     ) -> Proof {
         let output_point = poly.evaluate(input_point, domain);
-        let quotient = quotient_poly::compute(poly, input_point, output_point, domain);
+        let quotient = utils::compute(poly, input_point, output_point, domain);
         let quotient_commitment = commit_key.commit(&quotient);
         Proof { polynomial_commitment: poly_comm, quotient_commitment, output_point }
     }
@@ -45,7 +45,7 @@ impl Proof {
 mod tests {
 
     use ff::Field;
-    use crate::PublicParameters;
+    use crate::params::PublicParameters;
 
     use super::*;
 

@@ -1,4 +1,4 @@
-use super::{commit_key::*, opening_key::OpeningKey };
+use crate::{commit_key::*, opening_key::OpeningKey };
 use crate::{domain::Domain, G1Point, G2Point};
 
 // This is the SRS in lagrange form.
