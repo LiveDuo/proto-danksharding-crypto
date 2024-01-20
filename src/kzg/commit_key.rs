@@ -6,9 +6,7 @@ use crate::{domain::Domain, polynomial::Polynomial, G1Point, Scalar};
 ///  Where:
 /// - `i` ranges from 0 to `degree`.
 /// - `G` is some generator of the group
-pub struct CommitKey {
-    inner: Vec<G1Point>,
-}
+pub struct CommitKey { inner: Vec<G1Point>, }
 
 impl CommitKey {
     pub fn new(points: Vec<G1Point>) -> CommitKey {
@@ -18,11 +16,10 @@ impl CommitKey {
         );
         CommitKey { inner: points }
     }
+
     // Note: There is no commit method for CommitKey in monomial basis as this is not used
     pub fn into_lagrange(self, domain: &Domain) -> CommitKeyLagrange {
-        CommitKeyLagrange {
-            inner: domain.ifft_g1(self.inner),
-        }
+        CommitKeyLagrange { inner: domain.ifft_g1(self.inner) }
     }
 }
 
@@ -33,7 +30,7 @@ impl CommitKey {
 /// - `i` ranges from 0 to `degree`
 /// -  L_i is the i'th lagrange polynomial
 /// - `G` is some generator of the group
-pub struct CommitKeyLagrange { pub inner: Vec<G1Point>, }
+pub struct CommitKeyLagrange { inner: Vec<G1Point>, }
 
 impl CommitKeyLagrange {
     pub fn new(points: Vec<G1Point>) -> CommitKeyLagrange {
@@ -58,8 +55,7 @@ impl CommitKeyLagrange {
 
 // A multi-scalar multiplication
 pub fn g1_lincomb(points: &[G1Point], scalars: &[Scalar]) -> G1Point {
-    // TODO: We could use arkworks here and use their parallelized multi-
-    // exp instead
+    // TODO: We could use arkworks here and use their parallelized multi-exp instead
 
     // TODO: Spec says we should panic, but as a lib its better to return result
     assert_eq!(points.len(), scalars.len());

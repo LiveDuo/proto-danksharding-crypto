@@ -23,14 +23,7 @@ impl OpeningKey {
         // Store cached elements for verifying multiple proofs.
         let prepared_g2 = G2Prepared::from(g2_gen);
         let prepared_beta_g2 = G2Prepared::from(tau_g2_gen);
-
-        OpeningKey {
-            g1_gen,
-            g2_gen,
-            tau_g2_gen,
-            prepared_g2,
-            prepared_beta_g2,
-        }
+        OpeningKey { g1_gen, g2_gen, tau_g2_gen, prepared_g2, prepared_beta_g2, }
     }
 
     /// Checks that a polynomial `p` was evaluated at a point `z` and returned the value specified `y`.
@@ -48,11 +41,8 @@ impl OpeningKey {
         let inner_b: G2Point = (self.tau_g2_gen - (self.g2_gen * input_point)).into();
         let prepared_inner_b = G2Prepared::from(-inner_b);
 
-        let pairing = Bls12::multi_miller_loop(&[
-            (&inner_a, &self.prepared_g2),
-            (&witness_comm, &prepared_inner_b),
-        ])
-        .final_exponentiation();
+        let terms = [(&inner_a, &self.prepared_g2), (&witness_comm, &prepared_inner_b)];
+        let pairing = Bls12::multi_miller_loop(&terms).final_exponentiation();
 
         pairing.is_identity().into()
     }

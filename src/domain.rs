@@ -1,6 +1,7 @@
 use crate::{G1Point, G1Projective, Scalar};
-use ff::{Field, PrimeField};
+
 use group::{prime::PrimeCurveAffine, Curve, Group};
+use ff::{Field, PrimeField};
 
 #[derive(Debug, Clone)]
 pub struct Domain {

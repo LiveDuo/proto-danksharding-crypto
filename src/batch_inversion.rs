@@ -1,11 +1,13 @@
 use crate::Scalar;
+
+use std::ops::MulAssign;
+
 use ff::Field;
 
 /// Given a vector of field elements {v_i}, compute the vector {coeff * v_i^(-1)}
 /// This method is explicitly single core.
 pub fn serial_batch_inversion(v: &mut [Scalar]) {
-    use std::ops::MulAssign;
-
+    
     // Montgomery’s Trick and Fast Implementation of Masked AES
     // Genelle, Prouff and Quisquater
     // Section 3.2
