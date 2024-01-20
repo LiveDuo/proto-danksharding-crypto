@@ -1,12 +1,13 @@
+use eip4844::KZGProofBytes;
 use js_sys::{Array, Uint8Array};
-use serde::{Deserialize, Serialize};
+// use serde::{Deserialize, Serialize};
 use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
 mod utils;
 
 #[wasm_bindgen]
 pub struct Context(eip4844::Context);
 
-#[wasm_bindgen]
+// #[wasm_bindgen]
 pub enum ContextError {
     FailedToCommit,
 }
@@ -33,29 +34,29 @@ impl Context {
         Some(Uint8Array::from(comm_bytes.as_slice()))
     }
 
-    pub fn compute_aggregated_kzg_proof(&self, blobs_bytes: Array) -> Option<Array> {
-        let blobs_bytes = js_blobs_to_rust_blobs(blobs_bytes);
+    // pub fn compute_aggregated_kzg_proof(&self, blobs_bytes: Array) -> Option<Array> {
+    //     let blobs_bytes = js_blobs_to_rust_blobs(blobs_bytes);
 
-        let (proof, comms) = self.0.compute_aggregated_kzg_proof(blobs_bytes)?;
+    //     let (proof, comms) = self.0.compute_aggregated_kzg_proof(blobs_bytes)?;
 
-        Some(rust_aggregated_proof_data_to_js_aggregated_proof_data(
-            proof, comms,
-        ))
-    }
+    //     Some(rust_aggregated_proof_data_to_js_aggregated_proof_data(
+    //         proof, comms,
+    //     ))
+    // }
 
-    pub fn verify_aggregated_kzg_proof(
-        &self,
-        blobs_bytes: Array,
-        blob_comms_bytes: Array,
-        witness_comm_bytes: Uint8Array,
-    ) -> Option<bool> {
-        let blobs_bytes = js_blobs_to_rust_blobs(blobs_bytes);
-        let blob_comms_bytes = js_commitments_to_rust_commitments(blob_comms_bytes)?;
-        let witness_comm_bytes = js_bytes_to_rust_commitment(witness_comm_bytes)?;
+    // pub fn verify_aggregated_kzg_proof(
+    //     &self,
+    //     blobs_bytes: Array,
+    //     blob_comms_bytes: Array,
+    //     witness_comm_bytes: Uint8Array,
+    // ) -> Option<bool> {
+    //     let blobs_bytes = js_blobs_to_rust_blobs(blobs_bytes);
+    //     let blob_comms_bytes = js_commitments_to_rust_commitments(blob_comms_bytes)?;
+    //     let witness_comm_bytes = js_bytes_to_rust_commitment(witness_comm_bytes)?;
 
-        self.0
-            .verify_aggregated_kzg_proof(blobs_bytes, blob_comms_bytes, witness_comm_bytes)
-    }
+    //     self.0
+    //         .verify_aggregated_kzg_proof(blobs_bytes, blob_comms_bytes, witness_comm_bytes)
+    // }
 
     pub fn verify_kzg_proof(
         &self,
@@ -103,7 +104,7 @@ fn rust_blobs_to_js_blobs(blob_bytes: Vec<eip4844::BlobBytes>) -> Array {
     }
     arr
 }
-fn js_commitments_to_rust_commitments(comms: Array) -> Option<Vec<eip4844::SerialisedPoint>> {
+fn js_commitments_to_rust_commitments(comms: Array) -> Option<Vec<eip4844::SerializedG1Point>> {
     let mut commitments = Vec::with_capacity(comms.length() as usize);
 
     for entry in comms.entries() {
@@ -114,22 +115,22 @@ fn js_commitments_to_rust_commitments(comms: Array) -> Option<Vec<eip4844::Seria
 
     Some(commitments)
 }
-fn rust_commitments_to_js_commitments(comms: Vec<eip4844::SerialisedPoint>) -> Array {
+fn rust_commitments_to_js_commitments(comms: Vec<eip4844::SerializedG1Point>) -> Array {
     let arr = Array::new_with_length(comms.len() as u32);
     for (index, comm) in comms.into_iter().enumerate() {
         arr.set(index as u32, Uint8Array::from(comm.as_slice()).into())
     }
     arr
 }
-fn js_bytes_to_rust_commitment(bytes: Uint8Array) -> Option<eip4844::SerialisedPoint> {
+fn js_bytes_to_rust_commitment(bytes: Uint8Array) -> Option<eip4844::SerializedG1Point> {
     Uint8Array::from(bytes).to_vec().try_into().ok()
 }
-fn js_bytes_to_rust_scalar(bytes: Uint8Array) -> Option<eip4844::SerialisedScalar> {
+fn js_bytes_to_rust_scalar(bytes: Uint8Array) -> Option<eip4844::SerializedScalar> {
     Uint8Array::from(bytes).to_vec().try_into().ok()
 }
 
 fn rust_aggregated_proof_data_to_js_aggregated_proof_data(
-    proof: eip4844::KZGWitnessBytes,
+    proof: KZGProofBytes,
     commitments: Vec<eip4844::KZGCommitmentBytes>,
 ) -> Array {
     // Javascript doesn't support tuples, so we use Arrays
