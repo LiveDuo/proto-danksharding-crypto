@@ -9,7 +9,6 @@ use permutation::Permutable;
 
 pub struct Context {
     public_parameters: PublicParameters,
-    domain: Domain,
 }
 
 use crypto::Scalar;
@@ -32,7 +31,6 @@ impl Context {
 
         Context {
             public_parameters: public_parameters.permute(),
-            domain: domain.permute(),
         }
     }
 
@@ -40,16 +38,16 @@ impl Context {
         todo!("The trusted setup has not been completed. For testing use the `insecure` method")
     }
 
-    // setup_g1: G1 elements in monomial form
-    // setup_g1_lagrange: G1 elements in lagrange form
-    // setup_g2: G2 elements, For 4844, we only need 2 of these elements
-    pub fn from_hex(
-        setup_g1: Vec<SerializedG1Point>,
-        setup_g1_lagrange: Vec<SerializedG1Point>,
-        setup_g2: Vec<SerializedG2Point>,
-    ) -> Option<Self> {
-        todo!("The trusted setup has not been completed. For testing use the `insecure` method")
-    }
+    // // setup_g1: G1 elements in monomial form
+    // // setup_g1_lagrange: G1 elements in lagrange form
+    // // setup_g2: G2 elements, For 4844, we only need 2 of these elements
+    // pub fn from_hex(
+    //     setup_g1: Vec<SerializedG1Point>,
+    //     setup_g1_lagrange: Vec<SerializedG1Point>,
+    //     setup_g2: Vec<SerializedG2Point>,
+    // ) -> Option<Self> {
+    //     todo!("The trusted setup has not been completed. For testing use the `insecure` method")
+    // }
 
     pub fn blob_to_kzg_commitment(&self, blob_bytes: BlobBytes) -> Option<KZGCommitmentBytes> {
         let polynomial = blob_bytes_to_polynomial(blob_bytes)?;
